@@ -1,0 +1,58 @@
+-- Fill your name and CCID, and add your answers to each question.
+-- YOUR-NAME (YOUR-CCID) Yijie Gu gu8
+
+-- Add your SQL queries for each question here.
+
+--Q1
+select v1.pid,v2.pid
+from visits v1, visits v2
+where v1.time=v2.time
+and v1.lid like '%L10'
+and v2.lid like '%L10'
+and v1.pid<>v2.pid;
+
+--Q2
+select v1.pid,count(v1.lid)
+from contagious c1,visits v1
+where v1.pid=c1.pid
+and c1.start<=v1.time
+and c1.end>=v1.time
+group by v1.pid
+ORDER BY count(v1.lid) desc;
+
+--Q3
+select A1.lid,A1.name, A1.num
+from 
+(select  locations.lid,locations.name,(count(visits.time)-locations.capacity) as num
+from locations ,visits
+where locations.lid=visits.lid
+group by visits.lid,visits.time
+having count(visits.time)>locations.capacity) as A1,
+(select  locations.lid,locations.name,(count(visits.time)-locations.capacity) as num
+from locations ,visits
+where locations.lid=visits.lid
+group by visits.lid,visits.time
+having count(visits.time)>locations.capacity) as A2
+where A1.lid=A2.lid
+and A1.num >A2.num;
+
+
+--Q4
+
+select c1.pid
+from contagious c1
+EXCEPT
+select c2.pid
+from contagious c2,visits v
+where c2.pid=v.pid and v.time>c2.start and v.time<c2.end;
+
+--Q5
+
+select distinct(v1.pid), v2.pid
+from visits v1 left join contagious c1 on v1.pid=c1.pid,
+visits v2 left join contagious c2 on v2.pid=c2.pid
+where v1.time=v2.time
+and v1.lid=v2.lid
+and v1.time>=c1.start
+and v1.time<=c1.end
+and c2.start>=v2.time;
